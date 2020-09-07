@@ -10,7 +10,7 @@ if __name__ == '__main__':
     udemy_login = private_date.udemy_login
     udemy_password = private_date.udemy_password
 
-    url = "https://www.pepper.pl/promocje/za-darmo-kursy-python-145h-web-development-11h-java-22h-excel-45h-spring-hibernate-41hqt-core-12h-tally-erp9-8h-296106"
+    url = ""
 
     # depends of your internet connection
     sleep_time = 10
