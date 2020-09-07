@@ -1,7 +1,6 @@
 import pepper_free_course
 import private_date
 
-
 if __name__ == '__main__':
 
     my_bot = pepper_free_course.PepperBot()
@@ -10,6 +9,7 @@ if __name__ == '__main__':
     udemy_login = private_date.udemy_login
     udemy_password = private_date.udemy_password
 
+    # Write pepper promotion url below
     url = ""
 
     # depends of your internet connection
