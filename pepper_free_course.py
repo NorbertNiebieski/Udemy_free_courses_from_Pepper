@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
-import private_date
 
 
 class PepperBot:
@@ -20,6 +19,7 @@ class PepperBot:
         self.number_of_had_course = 0
         self.number_of_not_free_course = 0
         self.number_of_unrecognized_course = 0
+        self.number_of_checkout_problem = 0
 
         # web browser settings
         option = Options()
@@ -46,35 +46,43 @@ class PepperBot:
             print(" - " + str(self.number_of_had_course) + " course, wchich you had allready")
         if self.number_of_unrecognized_course > 0:
             print(" - " + str(self.number_of_unrecognized_course) + " course i dont recognize")
+        if self.number_of_checkout_problem > 0:
+            print(" - " + str(self.number_of_checkout_problem) + " course i had a problem with checkout")
 
     def talking_links_to_udemy_from_pepper_promotion(self, pepper_promotion_url, printing=True):
 
         self.driver.get(pepper_promotion_url)
-        sub_links = self.driver.find_elements_by_xpath("//a[contains(@title, 'udemy')]")
-        links = [link.get_attribute("title") for link in sub_links if link.get_attribute("title") != '']
+        sub_links = self.driver.find_elements_by_xpath("//a[contains(@title, 'www.udemy.com')]")
+        udemy_links = [udemy_link.get_attribute("title") for udemy_link in sub_links if udemy_link.get_attribute("title") != '']
         if printing:
-            print("I find " + str(links.__len__()) + " links")
-        return links
+            print("I find " + str(udemy_links.__len__()) + " links")
+        return udemy_links
 
-    def buy_free_course(self, link, sleep_time=5):
+    def buy_free_course(self, udemy_link, sleep_time=5):
 
-        if (sleep_time == 5):
+        if sleep_time == 5:
             sleep_time = self.sleep_time
-        self.driver.get(link)
+        self.driver.get(udemy_link)
         self.number_of_link_looked += 1
-        course_name = self.driver.find_element_by_xpath("//h1[@data-purpose=\"lead-title\"]").text
         sleep(sleep_time)
+        course_name = self.driver.find_element_by_xpath("//h1[@data-purpose=\"lead-title\"]").text
         prize = self.driver.find_element_by_xpath('//button[@data-purpose="buy-this-course-button"]')
         if prize.text == "Kup teraz" or prize.text == "Buy now":
             self.number_of_not_free_course += 1
             print("This course \"" + course_name + "\" is not for free")
         elif prize.text == "Zapisz się teraz" or prize.text == "Enroll now":
             prize.click()
-            sleep(2*sleep_time)
-            self.driver.find_element_by_xpath("//*[@id=\"udemy\"]/div[1]/div[2]/div/div/div/div[2]/form/div[2]/div/div[4]/button")\
-                .click()
+            sleep(sleep_time)
+            if self.driver.current_url[:50] == "https://www.udemy.com/cart/checkout/express/course":
+                sleep(2*sleep_time)
+                self.driver.find_element_by_xpath("//*[@id=\"udemy\"]/div[1]/div[2]/div/div/div/div[2]/form/div[2]/div/div[4]/button")\
+                    .click()
+            elif self.driver.current_url[:43] != "https://www.udemy.com/cart/subscribe/course":
+                self.number_of_checkout_problem += 1
+                print("I have a problem with this course \"" + course_name + "\" chechout")
+                return None
             print("YAY! You have new free course \"" + course_name + "\'!")
-            sleep(2*sleep_time)
+            sleep(sleep_time)
             self.number_of_new_course += 1
         elif prize.text == "Przejdź do kursu" or prize.text == "Go to course":
             self.number_of_had_course += 1
@@ -108,25 +116,3 @@ class PepperBot:
             return False
 
 
-if __name__ == '__main__':
-
-    my_bot = PepperBot()
-
-    udemy_login = private_date.udemy_login
-    udemy_password = private_date.udemy_password
-    url = "https://www.pepper.pl/promocje/za-darmo-kursy-ms-excel-f5-ltm-55h-javascript-firebase-6h-java-9-6h-power-bi-7h-kali-2020-hands-on-35h-ms-sql-5h-more-295582"
-
-    # taking links from pepper
-    links = my_bot.talking_links_to_udemy_from_pepper_promotion(url)
-
-    # logging to udemy
-    my_bot.log_to_udemy(udemy_login, udemy_password)
-
-    # checking every link
-    for link in links:
-        my_bot.buy_free_course(link)
-
-    # printing stats and ending
-    my_bot.printing_stats_udemy_courses()
-
-    my_bot.driver.close()
