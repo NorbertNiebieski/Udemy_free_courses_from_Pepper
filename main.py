@@ -8,7 +8,7 @@ if __name__ == '__main__':
     udemy_password = private_date.udemy_password
 
     # Write pepper promotion url below
-    #url = ""
+    # url = ""
 
     url = input("Pepper's promotion url: ")
 
@@ -18,15 +18,17 @@ if __name__ == '__main__':
     my_bot = pepper_free_course.PepperBot()
 
     # taking links from pepper
-    links = my_bot.talking_links_to_udemy_from_pepper_promotion(url)
+    links = my_bot.taking_links_to_udemy_from_pepper_promotion(url)
 
     # logging to udemy
     my_bot.log_to_udemy(udemy_login, udemy_password)
 
     # checking every link
+    saving = 0.0
     for link in links:
-        my_bot.buy_free_course(link, sleep_time)
+        saving += my_bot.buy_free_course(link, sleep_time)
 
     # printing stats and ending
     my_bot.printing_stats_udemy_courses()
+    print("You are save: " + str(saving))
     my_bot.driver.close()

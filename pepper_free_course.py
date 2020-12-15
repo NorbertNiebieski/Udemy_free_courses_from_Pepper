@@ -49,7 +49,7 @@ class PepperBot:
         if self.number_of_checkout_problem > 0:
             print(" - " + str(self.number_of_checkout_problem) + " course i had a problem with checkout")
 
-    def talking_links_to_udemy_from_pepper_promotion(self, pepper_promotion_url, printing=True):
+    def taking_links_to_udemy_from_pepper_promotion(self, pepper_promotion_url, printing=True):
 
         self.driver.get(pepper_promotion_url)
         sub_links = self.driver.find_elements_by_xpath("//a[contains(@title, 'www.udemy.com')]")
@@ -70,26 +70,38 @@ class PepperBot:
         if prize.text == "Kup teraz" or prize.text == "Buy now":
             self.number_of_not_free_course += 1
             print("This course \"" + course_name + "\" is not for free")
+            return 0
         elif prize.text == "Zapisz się teraz" or prize.text == "Enroll now":
+            saving = 0
+            # Transition to checkout
             prize.click()
             sleep(sleep_time)
+            # Checking if you are in checkout
             if self.driver.current_url[:50] == "https://www.udemy.com/cart/checkout/express/course":
-                sleep(2*sleep_time)
+                sleep(sleep_time)
+                # Collection how much you're saving
+                saving = self.driver.find_element_by_xpath('//td[@data-purpose="list-price"]/div/span').get_attribute("innerHTML")
+                saving = saving[:-3]
+                saving = float(saving.replace(',', '.'))
+                # buying
                 self.driver.find_element_by_xpath("//*[@id=\"udemy\"]/div[1]/div[2]/div/div/div/div[2]/form/div[2]/div/div[4]/button")\
                     .click()
             elif self.driver.current_url[:43] != "https://www.udemy.com/cart/subscribe/course":
                 self.number_of_checkout_problem += 1
                 print("I have a problem with this course \"" + course_name + "\" chechout")
-                return None
+                return 0
             print("YAY! You have new free course \"" + course_name + "\'!")
             sleep(sleep_time)
             self.number_of_new_course += 1
+            return saving
         elif prize.text == "Przejdź do kursu" or prize.text == "Go to course":
             self.number_of_had_course += 1
             print("You already had course \"" + course_name + "\"")
+            return 0
         else:
             self.number_of_unrecognized_course += 1
             print("I don\'t recognize this course \"" + course_name + "\"")
+            return 0
 
     def log_to_udemy(self, udemy_login, udemy_password, printing=True):
 
