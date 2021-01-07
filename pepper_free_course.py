@@ -78,7 +78,7 @@ class PepperBot:
             sleep(sleep_time)
             # Checking if you are in checkout
             if self.driver.current_url[:50] == "https://www.udemy.com/cart/checkout/express/course":
-                sleep(sleep_time)
+                sleep(2*sleep_time)
                 # Collection how much you're saving
                 saving = self.driver.find_element_by_xpath('//td[@data-purpose="list-price"]/div/span').get_attribute("innerHTML")
                 saving = saving[:-3]
