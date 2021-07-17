@@ -18,8 +18,9 @@ def main_test():
     else:
         print("Pepper bot lunch correctly!")
 
-    my_bot.log_to_pepper_account(pepper_login, pepper_password)
-
+    # my_bot.log_to_pepper_account(pepper_login, pepper_password)
+    my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/rower-szosowy-romet-huragany-r47cm-decathlon-417734")
+    sleep(5)
 
     my_bot.driver.close()
 

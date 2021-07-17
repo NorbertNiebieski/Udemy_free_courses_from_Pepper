@@ -43,7 +43,7 @@ class PepperBot:
 
         self.driver = uc.Chrome(options=option)
 
-    def log_to_pepper_account(self, pepper_login, pepper_password, sleep_time = 5):
+    def log_to_pepper_account(self, pepper_login, pepper_password, sleep_time=5):
 
         self.pepper_login = pepper_login
         self.pepper_password = pepper_password
@@ -69,12 +69,35 @@ class PepperBot:
         self.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(pepper_password)
         self.driver.find_element_by_xpath("//button[@name=\"form_submit\"]").click()
 
+        # check if you are successfully log to pepper account and print correct message
         sleep(sleep_time)
         if self.driver.find_elements_by_xpath("//button/img[@alt=\"Avatar\"]"):
             print("I successfully log you into your pepper account")
             return True
         else:
             print("Error! I was unable log to your pepper account")
+            return False
+
+    def give_plus_pepper_promotion(self, pepper_promotion_url="", sleep_time=5):
+
+        # check if you have to go to the pepper promotion url and go if yuo have to
+        if pepper_promotion_url!="":
+            self.driver.get(pepper_promotion_url)
+
+        # check if you already gave plus this pepper promotion
+        if self.driver.find_element_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
+            print("You already gave plus this pepper promotion")
+            return True
+
+        # give plus pepper promotion
+        self.driver.find_element_by_xpath("//button[@class=\"cept-up-vote space--h-2\"]").click()
+
+        # check if plus was gave correctlly
+        if self.driver.find_element_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
+            print("You successfully gave plus this pepper promotion")
+            return True
+        else:
+            print("Error! i was unable to gave plus pepper promotion")
             return False
 
     def printing_stats_udemy_courses(self):
