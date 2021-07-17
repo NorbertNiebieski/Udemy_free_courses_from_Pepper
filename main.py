@@ -1,5 +1,28 @@
 import pepper_free_course
 import private_date
+from time import sleep
+
+def main_test():
+
+    pepper_login = private_date.pepper_login
+    pepper_password = private_date.pepper_password
+
+    # depends of your internet connection
+    sleep_time = 2
+
+    try:
+        my_bot = pepper_free_course.PepperBot()
+    except:
+        print("Something went wrong with lunch pepper bot")
+        return -1
+    else:
+        print("Pepper bot lunch correctly!")
+
+    my_bot.log_to_pepper_account(pepper_login, pepper_password)
+
+
+    my_bot.driver.close()
+
 
 def main():
 
@@ -7,13 +30,17 @@ def main():
     udemy_login = private_date.udemy_login
     udemy_password = private_date.udemy_password
 
+    # in the another python file you could do your on file with this string or write your login and password below
+    pepper_login = private_date.pepper_login
+    pepper_password = private_date.pepper_password
+
     # Write pepper promotion url below
     # url = ""
 
     url = input("Pepper's promotion url: ")
 
     # depends of your internet connection
-    sleep_time = 5
+    sleep_time = 2
 
     try:
         my_bot = pepper_free_course.PepperBot()
@@ -38,6 +65,7 @@ def main():
         check_log_in = my_bot.log_to_udemy(udemy_login, udemy_password)
     except:
         print("I can't log to your udemy account!")
+        check_log_in = False
         return -1
     finally:
         if check_log_in == False:
