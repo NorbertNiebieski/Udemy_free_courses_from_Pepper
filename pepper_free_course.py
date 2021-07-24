@@ -57,7 +57,7 @@ class PepperBot:
 
         # check if you not log already
         if self.driver.find_elements_by_xpath("//button/img[@alt=\"Avatar\"]"):
-            print("You was already log to your account")
+            print("You was already log to your pepper account")
             return True
 
         # click log in button
@@ -81,24 +81,52 @@ class PepperBot:
     def give_plus_pepper_promotion(self, pepper_promotion_url="", sleep_time=5):
 
         # check if you have to go to the pepper promotion url and go if yuo have to
-        if pepper_promotion_url!="":
+        if pepper_promotion_url != "":
             self.driver.get(pepper_promotion_url)
 
         # check if you already gave plus this pepper promotion
-        if self.driver.find_element_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
+        if self.driver.find_elements_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
             print("You already gave plus this pepper promotion")
             return True
 
         # give plus pepper promotion
         self.driver.find_element_by_xpath("//button[@class=\"cept-up-vote space--h-2\"]").click()
 
-        # check if plus was gave correctlly
-        if self.driver.find_element_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
+        # check if plus was gave correctly
+        sleep(1)
+        if self.driver.find_elements_by_xpath("//span[@class=\"bubbleWrap bubbleWrap--s text--color-white bg--color-grey\"]"):
             print("You successfully gave plus this pepper promotion")
             return True
         else:
-            print("Error! i was unable to gave plus pepper promotion")
+            print("Error! I was unable to gave plus pepper promotion")
             return False
+
+    def find_udemy_promotions_on_pepper(self, how_old_in_days=30):
+
+        self.driver.get("https://www.pepper.pl/kupony/udemy.com")
+
+        promotions = self.driver.find_elements_by_xpath("//div[@class=\"threadGrid\"]")
+        times_since_post = self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")
+        counter = 0
+        promotions_links = []
+        print("I find this active promotions:")
+
+        # while(self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")[9 + counter].text):
+
+        for promotion in promotions:
+
+            # check if promotion is active
+            if promotion.find_elements_by_xpath(".//a[@class=\"cept-thread-image-link imgFrame imgFrame--noBorder thread-listImgCell img--mute\"]"):
+                break
+            # find link with promotion title
+            links = promotion.find_element_by_xpath(".//strong[@class=\"thread-title \"]/a")
+            promotions_links.append(links.get_attribute("href"))
+            promotion_title = links.text
+
+            counter += 1
+            print(str(counter) + ". " + promotion_title)
+
+        return promotions_links
 
     def printing_stats_udemy_courses(self):
 

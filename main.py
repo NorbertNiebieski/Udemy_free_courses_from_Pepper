@@ -18,8 +18,9 @@ def main_test():
     else:
         print("Pepper bot lunch correctly!")
 
-    # my_bot.log_to_pepper_account(pepper_login, pepper_password)
-    my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/rower-szosowy-romet-huragany-r47cm-decathlon-417734")
+    my_bot.log_to_pepper_account(pepper_login, pepper_password)
+    promotion_links = my_bot.find_udemy_promotions_on_pepper()
+    # my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/rower-szosowy-romet-huragany-r47cm-decathlon-417734")
     sleep(5)
 
     my_bot.driver.close()
@@ -38,7 +39,7 @@ def main():
     # Write pepper promotion url below
     # url = ""
 
-    url = input("Pepper's promotion url: ")
+    # url = input("Pepper's promotion url: ")
 
     # depends of your internet connection
     sleep_time = 2
@@ -51,12 +52,23 @@ def main():
     else:
         print("Pepper bot lunch correctly!")
 
+    my_bot.log_to_pepper_account(pepper_login, pepper_password)
+
+    promotion_links = my_bot.find_udemy_promotions_on_pepper()
+
     # taking links from pepper
-    try:
-        links = my_bot.taking_links_to_udemy_from_pepper_promotion(url)
-    except:
-        print("I can't find any links to udemy!")
-        return -1
+    # try:
+    #     links = my_bot.taking_links_to_udemy_from_pepper_promotion(url)
+    # except:
+    #     print("I can't find any links to udemy!")
+    #     return -1
+
+    links = []
+
+    for promotion_link in promotion_links:
+
+        links += my_bot.taking_links_to_udemy_from_pepper_promotion(promotion_link)
+        my_bot.give_plus_pepper_promotion()
 
     if not links:
         return 0
