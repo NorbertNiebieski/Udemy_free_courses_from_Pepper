@@ -19,8 +19,8 @@ def main_test():
         print("Pepper bot lunch correctly!")
 
     my_bot.log_to_pepper_account(pepper_login, pepper_password)
-    promotion_links = my_bot.find_udemy_promotions_on_pepper()
-    # my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/rower-szosowy-romet-huragany-r47cm-decathlon-417734")
+    #promotion_links = my_bot.find_udemy_promotions_on_pepper()
+    my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/maslo-200-g-82-przy-zakupie-3-szt-at-carrefour-421593")
     sleep(5)
 
     my_bot.driver.close()
@@ -86,15 +86,18 @@ def main():
 
     # checking every link
     saving = 0
+    course_number = 0
+    number_of_course = len(links)
     for link in links:
+        course_number += 1
         try:
-            saving += my_bot.buy_free_course(link, sleep_time)
+            saving += my_bot.buy_free_course(link, sleep_time, course_number, number_of_course)
         except:
             print("Something went wrong with this link: " + link)
 
     # printing stats and ending
     my_bot.printing_stats_udemy_courses()
-    print("You are save: " + str(saving))
+    print("You are save: " + str(round(saving, 2)))
     my_bot.driver.close()
 
 main()

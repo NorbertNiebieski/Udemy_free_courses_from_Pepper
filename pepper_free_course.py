@@ -151,7 +151,7 @@ class PepperBot:
             print("I find " + str(udemy_links.__len__()) + " links")
         return udemy_links
 
-    def buy_free_course(self, udemy_link, sleep_time=5):
+    def buy_free_course(self, udemy_link, sleep_time=5, course_number=0, number_of_course=0):
 
         if sleep_time == 5:
             sleep_time = self.sleep_time
@@ -162,7 +162,10 @@ class PepperBot:
         prize = self.driver.find_element_by_xpath('//button[@data-purpose="buy-this-course-button"]')
         if prize.text == "Kup teraz" or prize.text == "Buy now":
             self.number_of_not_free_course += 1
-            print("This course \"" + course_name + "\" is not for free")
+            if course_number:
+                print("This course \"" + course_name + "\" is not for free! (" + str(course_number) + "/" + str(number_of_course)+ ")")
+            else:
+                print("This course \"" + course_name + "\" is not for free!")
             return 0
         elif prize.text == "Zapisz się teraz" or prize.text == "Enroll now":
             saving = 0
@@ -182,7 +185,11 @@ class PepperBot:
                     .click()
             elif self.driver.current_url[:43] != "https://www.udemy.com/cart/subscribe/course":
                 self.number_of_checkout_problem += 1
-                print("I have a problem with this course \"" + course_name + "\" chechout")
+                if course_number:
+                    print("I have a problem with this course \"" + course_name + "\" chechout! (" + str(course_number) + "/" + str(
+                        number_of_course) + ")")
+                else:
+                    print("I have a problem with this course \"" + course_name + "\" chechout!")
                 return 0
             print("YAY! You have new free course \"" + course_name + "\'!")
             sleep(sleep_time)
@@ -190,11 +197,18 @@ class PepperBot:
             return saving
         elif prize.text == "Przejdź do kursu" or prize.text == "Go to course":
             self.number_of_had_course += 1
-            print("You already had course \"" + course_name + "\"")
+            if course_number:
+                print("You already had course \"" + course_name + "\"! (" + str(course_number) + "/" + str(number_of_course) + ")")
+            else:
+                print("You already had course \"" + course_name + "\"!")
             return 0
         else:
             self.number_of_unrecognized_course += 1
             print("I don\'t recognize this course \"" + course_name + "\"")
+            if course_number:
+                print("I don\'t recognize this course \"" + course_name + "\"! (" + str(course_number) + "/" + str(number_of_course) + ")")
+            else:
+                print("I don\'t recognize this course \"" + course_name + "\"!")
             return 0
 
     def log_to_udemy(self, udemy_login, udemy_password, printing=True):
