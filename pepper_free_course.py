@@ -1,6 +1,7 @@
 from selenium import webdriver
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from time import sleep
 from math import trunc
 
@@ -31,7 +32,11 @@ class PepperBot:
 
         option.add_argument("--disable-infobars")
         option.add_argument("start-maximized")
-        option.add_argument("--disable-extensions")
+        #option.add_argument("--disable-extensions")
+        option.add_argument('--disable-blink-features=AutomationControlled')
+        option.add_argument("--window-size=1920,1080")
+        option.add_argument("--enable-javascript")
+        option.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
 
         # Path to your chrome profile
         option.add_argument("user-data-dir=C:\\Users\\Norbert\\AppData\\Local\\Google\\Chrome\\User Data\\Default")
@@ -78,6 +83,38 @@ class PepperBot:
             print("Error! I was unable log to your pepper account")
             return False
 
+    def find_udemy_promotions_on_pepper(self, how_old_in_days=30):
+
+        self.driver.get("https://www.pepper.pl/kupony/udemy.com")
+
+        # div with whole promotion with image, link...
+        promotions = self.driver.find_elements_by_xpath("//div[contains(@class, \"threadGrid thread-clickRoot\")]")
+        times_since_post = self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")
+        counter = 0
+        promotions_links = []
+        print("I find this active promotions:")
+
+        # while(self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")[9 + counter].text):
+
+        for promotion in promotions:
+
+            try:
+                # check if promotion is active
+                if promotion.find_elements_by_xpath(
+                        ".//a[@class=\"cept-thread-image-link imgFrame imgFrame--noBorder thread-listImgCell img--mute\"]"):
+                    break
+                # find link with promotion title
+                links = promotion.find_element_by_xpath(".//strong[@class=\"thread-title \"]/a")
+                promotions_links.append(links.get_attribute("href"))
+                promotion_title = links.text
+
+                counter += 1
+                print(str(counter) + ". " + promotion_title)
+            except:
+                print("I have problem with this " + promotion + " promotion!")
+
+        return promotions_links
+
     def give_plus_pepper_promotion(self, pepper_promotion_url="", sleep_time=5):
 
         # check if you have to go to the pepper promotion url and go if yuo have to
@@ -100,33 +137,6 @@ class PepperBot:
         else:
             print("Error! I was unable to gave plus pepper promotion")
             return False
-
-    def find_udemy_promotions_on_pepper(self, how_old_in_days=30):
-
-        self.driver.get("https://www.pepper.pl/kupony/udemy.com")
-
-        promotions = self.driver.find_elements_by_xpath("//div[@class=\"threadGrid\"]")
-        times_since_post = self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")
-        counter = 0
-        promotions_links = []
-        print("I find this active promotions:")
-
-        # while(self.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")[9 + counter].text):
-
-        for promotion in promotions:
-
-            # check if promotion is active
-            if promotion.find_elements_by_xpath(".//a[@class=\"cept-thread-image-link imgFrame imgFrame--noBorder thread-listImgCell img--mute\"]"):
-                break
-            # find link with promotion title
-            links = promotion.find_element_by_xpath(".//strong[@class=\"thread-title \"]/a")
-            promotions_links.append(links.get_attribute("href"))
-            promotion_title = links.text
-
-            counter += 1
-            print(str(counter) + ". " + promotion_title)
-
-        return promotions_links
 
     def printing_stats_udemy_courses(self):
 
@@ -176,12 +186,15 @@ class PepperBot:
             if self.driver.current_url[:50] == "https://www.udemy.com/cart/checkout/express/course":
                 sleep(2*sleep_time)
                 # Collection how much you're saving
-                saving = self.driver.find_element_by_xpath('//td[@data-purpose="list-price"]/div/span').get_attribute("innerHTML")
-                saving = saving[:-3]
-                saving = float(saving.replace(',', '.'))
-                saving = trunc(saving*100)/100
+                try:
+                    saving = self.driver.find_element_by_xpath('//td[@data-purpose="list-price"]/div/span').get_attribute("innerHTML")
+                    saving = saving[:-3]
+                    saving = float(saving.replace(',', '.'))
+                    saving = trunc(saving*100)/100
+                except:
+                    pass
                 # buying
-                button = self.driver.find_elements_by_xpath("//button[@type=\"submit\"]")[2]\
+                button = self.driver.find_elements_by_xpath("//button[@type=\"button\"]")[2]\
                     .click()
             elif self.driver.current_url[:43] != "https://www.udemy.com/cart/subscribe/course":
                 self.number_of_checkout_problem += 1
@@ -211,16 +224,20 @@ class PepperBot:
                 print("I don\'t recognize this course \"" + course_name + "\"!")
             return 0
 
-    def log_to_udemy(self, udemy_login, udemy_password, printing=True):
+    def log_to_udemy(self, udemy_login, udemy_password, printing=True, sleep_time=5):
 
         self.udemy_login = udemy_login
         self.udemy_password = udemy_password
 
+        self.driver.get("https://www.udemy.com/")
+        sleep(1)
         # go to udemy login page
         self.driver.get("https://www.udemy.com/join/login-popup/?locale=pl_PL&response_type=html&next=https%3A%2F%2Fwww.udemy.com%2F")
 
         # uncomment below code if you want check i am not a robot box
         # input("Press Enter to continue...")
+
+        sleep(sleep_time)
 
         if self.driver.current_url == "https://www.udemy.com/":
             if printing:
@@ -228,15 +245,15 @@ class PepperBot:
             return True
 
         sleep(1)
-
-        if self.driver.find_element_by_xpath("//input[@name=\"email\"]").is_displayed():
+        try:
             self.driver.find_element_by_xpath("//input[@name=\"email\"]") \
                 .send_keys(udemy_login)
+        except:
+            pass
 
         self.driver.find_element_by_xpath("//input[@name=\"password\"]") \
-            .send_keys(udemy_password)
-        self.driver.find_element_by_xpath("//input[@name=\"submit\"]") \
-            .click()
+            .send_keys(udemy_password + Keys.ENTER)
+
 
         sleep(1)
         if self.driver.current_url == "https://www.udemy.com/":

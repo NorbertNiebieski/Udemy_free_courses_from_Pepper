@@ -43,6 +43,7 @@ def main():
 
     # depends of your internet connection
     sleep_time = 2
+    printing = True
 
     try:
         my_bot = pepper_free_course.PepperBot()
@@ -68,21 +69,25 @@ def main():
     for promotion_link in promotion_links:
 
         links += my_bot.taking_links_to_udemy_from_pepper_promotion(promotion_link)
-        my_bot.give_plus_pepper_promotion()
+        try:
+            my_bot.give_plus_pepper_promotion()
+        except:
+            print("There was an error adding the plus!")
 
     if not links:
         return 0
 
     # logging to udemy
-    try:
-        check_log_in = my_bot.log_to_udemy(udemy_login, udemy_password)
-    except:
-        print("I can't log to your udemy account!")
-        check_log_in = False
-        return -1
-    finally:
-        if check_log_in == False:
-            return -1
+    # try:
+    #     check_log_in = my_bot.log_to_udemy(udemy_login, udemy_password, printing, sleep_time)
+    # except Exception as e:
+    #     print("I can't log to your udemy account!")
+    #     print(e)
+    #     check_log_in = False
+    #     return -1
+    # finally:
+    #     if check_log_in == False:
+    #         return -1
 
     # checking every link
     saving = 0
