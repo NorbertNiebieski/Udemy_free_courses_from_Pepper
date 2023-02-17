@@ -1,69 +1,47 @@
-import pepper_free_course
+import web_bot
 import private_date
-from time import sleep
-
-def main_test():
-
-    pepper_login = private_date.pepper_login
-    pepper_password = private_date.pepper_password
-
-    # depends of your internet connection
-    sleep_time = 2
-
-    try:
-        my_bot = pepper_free_course.PepperBot()
-    except:
-        print("Something went wrong with lunch pepper bot")
-        return -1
-    else:
-        print("Pepper bot lunch correctly!")
-
-    my_bot.log_to_pepper_account(pepper_login, pepper_password)
-    #promotion_links = my_bot.find_udemy_promotions_on_pepper()
-    my_bot.give_plus_pepper_promotion("https://www.pepper.pl/promocje/maslo-200-g-82-przy-zakupie-3-szt-at-carrefour-421593")
-    sleep(5)
-
-    my_bot.driver.close()
 
 
 def main():
 
-    # in the another python file you could do your on file with this string or write your login and password below
-    udemy_login = private_date.udemy_login
-    udemy_password = private_date.udemy_password
+    # in the another python file you can write your login and password to udemy account
+    try:
+        udemy_login = private_date.udemy_login
+        udemy_password = private_date.udemy_password
+    except:
+        print("You can create file private_date.py and write there your login an password to udemy account")
+        udemy_login = input("Please, write your udemy account login")
+        udemy_password = input("Please, write your udemy account password")
 
-    # in the another python file you could do your on file with this string or write your login and password below
-    pepper_login = private_date.pepper_login
-    pepper_password = private_date.pepper_password
+    # in the another python file you can write your login and password to pepper account
+    try:
+        pepper_login = private_date.pepper_login
+        pepper_password = private_date.pepper_password
+    except:
+        print("You can create file private_date.py and write there your login an password to pepper account")
+        pepper_login = input("Please, write your pepper account login")
+        pepper_password = input("Please, write your pepper account password")
 
-    # Write pepper promotion url below
-    # url = ""
+    # in the another python file you can write path to your chrome profile
+    try:
+        path_to_chrome_profile = private_date.path_to_chrome_profile
+    except:
+        print("You can create file private_date.py and write there path to your chrome profile")
+        path_to_chrome_profile = input("Please, write path to your chrome profile or leave blank")
 
-    # url = input("Pepper's promotion url: ")
-
-    # depends of your internet connection
+    # depends on your internet connection
     sleep_time = 2
     printing = True
 
     try:
-        my_bot = pepper_free_course.PepperBot()
+        my_bot = web_bot.WebBot(udemy_login, udemy_password, pepper_login, pepper_password, path_to_chrome_profile)
+        print("Pepper bot lunch correctly!")
     except:
         print("Something went wrong with lunch pepper bot")
         return -1
-    else:
-        print("Pepper bot lunch correctly!")
 
-    my_bot.log_to_pepper_account(pepper_login, pepper_password)
-
+    my_bot.log_to_pepper_account()
     promotion_links = my_bot.find_udemy_promotions_on_pepper()
-
-    # taking links from pepper
-    # try:
-    #     links = my_bot.taking_links_to_udemy_from_pepper_promotion(url)
-    # except:
-    #     print("I can't find any links to udemy!")
-    #     return -1
-
     links = []
 
     for promotion_link in promotion_links:
@@ -78,16 +56,13 @@ def main():
         return 0
 
     # logging to udemy
-    # try:
-    #     check_log_in = my_bot.log_to_udemy(udemy_login, udemy_password, printing, sleep_time)
-    # except Exception as e:
-    #     print("I can't log to your udemy account!")
-    #     print(e)
-    #     check_log_in = False
-    #     return -1
-    # finally:
-    #     if check_log_in == False:
-    #         return -1
+    try:
+        if my_bot.log_to_udemy():
+            return -1
+    except Exception as e:
+        print("I can't log to your udemy account!")
+        print(e)
+        return -1
 
     # checking every link
     saving = 0
@@ -96,7 +71,7 @@ def main():
     for link in links:
         course_number += 1
         try:
-            saving += my_bot.buy_free_course(link, sleep_time, course_number, number_of_course)
+            saving += my_bot.buy_free_course(link, course_number, number_of_course)
         except:
             print("Something went wrong with this link: " + link)
 
@@ -105,4 +80,6 @@ def main():
     print("You are save: " + str(round(saving, 2)))
     my_bot.driver.close()
 
-main()
+
+if __name__ == '__main__':
+    main()
