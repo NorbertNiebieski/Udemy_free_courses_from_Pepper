@@ -1,20 +1,16 @@
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
-from time import sleep
-from math import trunc
 
 import pepper_handling
 import udemy_handling
 
 
 class WebBot:
-    def __init__(self, udemy_login="", udemy_password="", pepper_promotion_url="", pepper_login="", pepper_password="",
+    def __init__(self, udemy_login="", udemy_password="", pepper_login="", pepper_password="",
                  path_to_chrome_profile="", sleep_time=5, printing=True):
 
         self.udemy_login = udemy_login
         self.udemy_password = udemy_password
-
-        self.pepper_promotion_url = pepper_promotion_url
 
         self.pepper_login = pepper_login
         self.pepper_password = pepper_password

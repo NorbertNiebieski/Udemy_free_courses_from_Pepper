@@ -3,7 +3,6 @@ import private_date
 
 
 def main():
-
     # in the another python file you can write your login and password to udemy account
     try:
         udemy_login = private_date.udemy_login
@@ -33,17 +32,21 @@ def main():
     sleep_time = 2
     printing = True
 
+    # starting bot
     try:
-        my_bot = web_bot.WebBot(udemy_login, udemy_password, pepper_login, pepper_password, path_to_chrome_profile)
+        my_bot = web_bot.WebBot(udemy_login, udemy_password, pepper_login, pepper_password, path_to_chrome_profile,
+                                sleep_time, printing)
         print("Pepper bot lunch correctly!")
     except:
         print("Something went wrong with lunch pepper bot")
         return -1
 
+    # logging to pepper account and finding promotions with udemy courses
     my_bot.log_to_pepper_account()
     promotion_links = my_bot.find_udemy_promotions_on_pepper()
     links = []
 
+    # extracting links to udemy courses and adding plus to pepper promotion
     for promotion_link in promotion_links:
 
         links += my_bot.taking_links_to_udemy_from_pepper_promotion(promotion_link)
@@ -55,7 +58,7 @@ def main():
     if not links:
         return 0
 
-    # logging to udemy
+    # logging to udemy account
     try:
         if my_bot.log_to_udemy():
             return -1
