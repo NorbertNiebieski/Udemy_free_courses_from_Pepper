@@ -36,13 +36,18 @@ def main():
     try:
         my_bot = web_bot.WebBot(udemy_login, udemy_password, pepper_login, pepper_password, path_to_chrome_profile,
                                 sleep_time, printing)
-        print("Pepper bot lunch correctly!")
+        print("Bot lunch correctly!")
     except:
-        print("Something went wrong with lunch pepper bot")
+        print("Something went wrong with lunch bot")
         return -1
 
-    # logging to pepper account and finding promotions with udemy courses
-    my_bot.log_to_pepper_account()
+    # logging to pepper account
+    try:
+        my_bot.log_to_pepper_account()
+    except Exception as error:
+        print("I was unable to log your pepper account")
+
+    # finding promotions with udemy courses
     promotion_links = my_bot.find_udemy_promotions_on_pepper()
     links = []
 
@@ -81,8 +86,7 @@ def main():
     # printing stats and ending
     my_bot.printing_stats_udemy_courses()
     print("You are save: " + str(round(saving, 2)))
-    my_bot.driver.close()
-
+    my_bot.driver.quit()
 
 if __name__ == '__main__':
     main()
