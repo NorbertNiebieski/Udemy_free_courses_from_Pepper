@@ -1,19 +1,22 @@
 import os
+import random
 import subprocess
 import sys
 from math import trunc
 from time import sleep
 
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
 def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time=5):
     # go to udemy main page
     web_bot.driver.get("https://www.udemy.com/")
-    sleep(5)
+    sleep(sleep_time)
 
     _check_cloudflare_blockade_and_try_bypass(web_bot)
-    _is_perimeterx_blockade(web_bot)
+    _check_is_perimeterx_blockade_and_try_bypass(web_bot)
 
     # check if you already logged to udemy account
     if _is_logged_to_udemy_account(web_bot, sleep_time):
@@ -25,7 +28,7 @@ def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time
     web_bot.driver.find_element_by_xpath("//a[@data-purpose='header-login']").click()
     sleep(sleep_time/2)
 
-    _is_perimeterx_blockade(web_bot)
+    _check_is_perimeterx_blockade_and_try_bypass(web_bot)
     _check_cloudflare_blockade_and_try_bypass(web_bot)
 
     try:
@@ -47,12 +50,37 @@ def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time
         return False
 
 
-def _is_perimeterx_blockade(web_bot):
-    if web_bot.driver.find_elements_by_xpath("//*[contains (text(), \"PerimeterX\")]"):
-        input("There is PerimeterX bot blockade, please confirm that you are human and press any key to continue ")
+def _check_is_perimeterx_blockade_and_try_bypass(web_bot, solve_captcha=True):
+    if _is_perimeterx_blockade(web_bot):
+        print("Detected PerimeterX blockade")
+        sleep(web_bot.sleep_time / 2)
+        if solve_captcha:
+            while _is_perimeterx_blockade(web_bot):
+                print("I am trying to solve captcha")
+                _try_solve_perimeterx_captcha(web_bot)
+                sleep(2*web_bot.sleep_time)
+                if not _is_perimeterx_blockade(web_bot):
+                    print("Successfully bypass PerimeterX blockade")
+                    return False
+                web_bot.driver.refresh()
         return True
     else:
         return False
+
+
+def _is_perimeterx_blockade(web_bot) -> bool:
+    return web_bot.driver.find_elements_by_xpath("//*[contains (text(), \"PerimeterX\")]")
+
+
+def _try_solve_perimeterx_captcha(web_bot):
+    mouse_tracker = web_bot.driver.find_element(By.ID, "px-captcha")
+    ActionChains(web_bot.driver) \
+        .move_to_element(mouse_tracker) \
+        .move_by_offset(-450, 0 + random.randint(-25, 25)) \
+        .click_and_hold() \
+        .perform()
+    sleep(6 + random.randint(-2, 2))
+    ActionChains(web_bot.driver).release().perform()
 
 
 def _check_cloudflare_blockade_and_try_bypass(web_bot, ask_human_for_help=True, restart_if_blockade=True):

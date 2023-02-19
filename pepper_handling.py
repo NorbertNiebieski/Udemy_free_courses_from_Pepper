@@ -20,10 +20,11 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password, sleep_time=5):
     # fill necessary data and click another log in button
     web_bot.driver.find_element_by_xpath("//input[@name=\"identity\"]").send_keys(pepper_login)
     web_bot.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(pepper_password + Keys.ENTER)
+    sleep(sleep_time/5)
 
     # check if you are successfully log to pepper account and print correct message
     if _is_logged_to_pepper_account(web_bot, sleep_time):
-        print("I successfully log you into your pepper account")
+        print("I successfully log to your pepper account")
         return True
     else:
         print("Error! I was unable log to your pepper account")

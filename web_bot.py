@@ -24,7 +24,7 @@ class WebBot:
         self.pepper_password = pepper_password
 
         # set depends on speed of your internet connection
-        self.sleep_time = sleep_time + random.randint(-1, 1)
+        self.sleep_time = sleep_time + random.randint(-1, 3)
 
         # True if you want detailed info in console
         self.printing = printing
