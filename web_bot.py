@@ -3,10 +3,10 @@ from selenium.webdriver.chrome.options import Options
 import random
 import chromedriver_autoinstaller
 
-
 import pepper_handling
 import udemy_handling
 import user_agents
+import log
 
 
 class WebBot:
@@ -52,10 +52,10 @@ class WebBot:
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--enable-javascript")
 
-
-        number_of_user_agents = len(user_agents.user_agents)
+        # number_of_user_agents = len(user_agents.user_agents)
         # options.add_argument("user-agent=" + user_agents.user_agents[random.randint(0, number_of_user_agents - 1)])
-        options.add_argument("user-agent=" + "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'")
+        options.add_argument("user-agent=" + "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+                                             "like Gecko) Chrome/110.0.0.0 Safari/537.36'")
 
         # Path to your chrome profile
         if path_to_chrome_profile != "":
@@ -125,5 +125,6 @@ class WebBot:
         if self.is_logged_to_udemy:
             return udemy_handling.buy_free_course(self, link, self.sleep_time, course_number, number_of_course)
         else:
-            print("Something went wrong with this link: " + link)
+            print("You are not logged to udemy account, when trying to handle this link - " + link)
+            log.root.warning("You are not logged to udemy account, when trying to handle this link - " + link)
             return 0

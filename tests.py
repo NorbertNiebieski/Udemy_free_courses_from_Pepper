@@ -1,27 +1,31 @@
 import unittest2
 
 import web_bot
-import private_date
+import private_data
+
+import log
 
 
 class MyTestCase(unittest2.TestCase):
     __my_bot = None
-    __stored_cookies = {}
 
     @classmethod
     def setUp(cls):
         # loading private data
-        cls.udemy_login = private_date.udemy_login
-        cls.udemy_password = private_date.udemy_password
+        cls.udemy_login = private_data.udemy_login
+        cls.udemy_password = private_data.udemy_password
 
-        cls.pepper_login = private_date.pepper_login
-        cls.pepper_password = private_date.pepper_password
+        cls.pepper_login = private_data.pepper_login
+        cls.pepper_password = private_data.pepper_password
 
-        cls.path_to_chrome_profile = private_date.path_to_chrome_profile
+        cls.path_to_chrome_profile = private_data.path_to_chrome_profile
 
         # depends on your internet connection
         cls.sleep_time = 2
         cls.printing = True
+
+        # variable to storing cookies
+        cls.__stored_cookies = {}
 
         # starting bot
         try:
@@ -29,10 +33,11 @@ class MyTestCase(unittest2.TestCase):
                                           cls.pepper_password,
                                           cls.path_to_chrome_profile, cls.sleep_time, cls.printing, "tests.py")
             print("Bot lunch correctly!")
+            log.root.info("Bot lunch correctly!")
         except Exception as error:
-            print(error)
-            print("Error when lunching bot")
-            exit(-1)
+            print("Something went wrong with lunch bot")
+            log.root.error("Something went wrong with lunch bot - %s", error, exc_info=1)
+            return -1
 
     @classmethod
     def tearDown(cls):
@@ -44,7 +49,7 @@ class MyTestCase(unittest2.TestCase):
         try:
             self.assertTrue(self.__my_bot.log_to_pepper_account())
         except Exception as error:
-            print(error)
+            log.root.error("Error when logging to pepper account - %s", error, exc_info=1)
             self.__adding_stored_cookies("https://www.pepper.pl/")
             self.assertTrue(False, "Error when logging to pepper account")
 
@@ -53,9 +58,9 @@ class MyTestCase(unittest2.TestCase):
         try:
             self.assertTrue(self.__my_bot.log_to_udemy())
         except Exception as error:
-            print(error)
+            log.root.error("Error when logging to udemy account - %s", error, exc_info=1)
             self.__adding_stored_cookies("https://www.udemy.com/")
-            self.assertTrue(False)
+            self.assertTrue(False, "Error when logging to udemy account")
 
     def __adding_stored_cookies(self, cookies_domain):
         if self.__my_bot.driver.current_url != cookies_domain:
