@@ -37,14 +37,24 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password, sleep_time=5):
 
 
 def _is_logged_to_pepper_account(web_bot, sleep_time) -> bool:
+    # check if webdriver is on correct page
     if "pepper.pl" not in web_bot.driver.current_url:
+
+        # save current url
         current_url = web_bot.driver.current_url
+
+        # get to udemy url
         web_bot.driver.get("https://www.pepper.pl")
+
+        # check if button to user account(avatar) is on page
         is_logged = web_bot.driver.find_elements_by_xpath("//button[contains(@class, 'navDropDown-trigger aGrid')]")
+
+        # go back to first url
         web_bot.driver.get(current_url)
         sleep(sleep_time / 5)
         return is_logged
     else:
+        # check if button to user account(avatar) is on page
         return web_bot.driver.find_elements_by_xpath("//button[contains(@class, 'navDropDown-trigger aGrid')]")
 
 
@@ -94,6 +104,7 @@ def find_udemy_promotions_on_pepper(web_bot, how_old_in_days=30):
     promotions = web_bot.driver.find_elements_by_xpath("//div[contains(@class, \"threadGrid thread-clickRoot\")]")
     counter = 0
     promotions_links = []
+
     print("I find this active promotions:")
     log.root.info("I find this active promotions:")
 
@@ -132,5 +143,6 @@ def taking_links_to_udemy_from_pepper_promotion(web_bot, pepper_promotion_url, p
 
     if printing:
         print("I find " + str(udemy_links.__len__()) + " links")
+
     log.root.info("I find " + str(udemy_links.__len__()) + " links")
     return udemy_links
