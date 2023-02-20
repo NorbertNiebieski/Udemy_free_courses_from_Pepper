@@ -229,7 +229,7 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
 
             # buying
             web_bot.driver.find_elements_by_xpath("//button[@type=\"button\"]")[2].click()
-            sleep(sleep_time / 2)
+            sleep(sleep_time)
 
             web_bot.number_of_new_course += 1
             print("YAY! You have new free course \"" + course_name + "\'!" + how_many_course_left_text)

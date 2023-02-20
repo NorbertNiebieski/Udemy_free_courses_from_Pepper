@@ -31,8 +31,8 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password, sleep_time=5):
         log.root.info("I successfully log to your pepper account")
         return True
     else:
-        print("I was unable log to your pepper account")
-        log.root.warning("Warning! I was unable log to your pepper account")
+        print("I was unable to log to your pepper account")
+        log.root.warning("I was unable to log to your pepper account")
         return False
 
 
@@ -101,7 +101,7 @@ def find_udemy_promotions_on_pepper(web_bot, how_old_in_days=30):
     # while(web_bot.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")[9 + counter].text):
 
     # div with whole promotion with image, link...
-    promotions = web_bot.driver.find_elements_by_xpath("//div[contains(@class, \"threadGrid thread-clickRoot\")]")
+    promotions = web_bot.driver.find_elements_by_xpath("//div[contains(@class, 'threadGrid thread-clickRoot')]")
     counter = 0
     promotions_links = []
 
@@ -111,9 +111,8 @@ def find_udemy_promotions_on_pepper(web_bot, how_old_in_days=30):
     for promotion in promotions:
 
         try:
-            # check if promotion is active
-            if promotion.find_elements_by_xpath(
-                    ".//a[@class=\"cept-thread-image-link imgFrame imgFrame--noBorder thread-listImgCell img--mute\"]"):
+            # check if promotion is active - vote box is grayed, xpath should start with . to search only in promotion
+            if promotion.find_elements_by_xpath(".//div[contains(@class, 'vote-box--muted')]"):
                 break
             # find link with promotion title
             links = promotion.find_element_by_xpath(".//strong[@class=\"thread-title \"]/a")

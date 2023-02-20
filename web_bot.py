@@ -1,7 +1,6 @@
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
 import random
-import chromedriver_autoinstaller
 
 import pepper_handling
 import udemy_handling
@@ -13,10 +12,6 @@ class WebBot:
     def __init__(self, udemy_login="", udemy_password="", pepper_login="", pepper_password="",
                  path_to_chrome_profile="", sleep_time=5, printing=True, starting_file="main.py"):
 
-        # Check if the current version of chromedriver exists and if it doesn't exist, download it automatically,
-        # then add chromedriver to path
-        chromedriver_autoinstaller.install()
-
         self.udemy_login = udemy_login
         self.udemy_password = udemy_password
 
@@ -24,7 +19,7 @@ class WebBot:
         self.pepper_password = pepper_password
 
         # set depends on speed of your internet connection
-        self.sleep_time = sleep_time + random.randint(-1, 3)
+        self.sleep_time = sleep_time + random.randint(-1, 1)
 
         # True if you want detailed info in console
         self.printing = printing
@@ -54,8 +49,8 @@ class WebBot:
 
         # number_of_user_agents = len(user_agents.user_agents)
         # options.add_argument("user-agent=" + user_agents.user_agents[random.randint(0, number_of_user_agents - 1)])
-        options.add_argument("user-agent=" + "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
-                                             "like Gecko) Chrome/110.0.0.0 Safari/537.36'")
+        # options.add_argument("user-agent=" + "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+        #                                      "like Gecko) Chrome/110.0.0.0 Safari/537.36'")
 
         # Path to your chrome profile
         if path_to_chrome_profile != "":
@@ -65,9 +60,16 @@ class WebBot:
         # options.add_argument("--incognito")
         options.add_argument("use_subprocess=True")
 
-        # Pass the argument 1 to allow and 2 to block
+        # setting browser preferences
+        # pass the argument 1 to allow and 2 to block
         options.add_experimental_option("prefs", {
-            "profile.default_content_setting_values.notifications": 2
+            # block notification
+            "profile.default_content_setting_values.notifications": 2,
+            # block third party cookies
+            "profile.default_content_setting_values.cookies": 1,
+            "profile.block_third_party_cookies": True,
+            # turn on do not track preference
+            "enable_do_not_track": True
         })
 
         # web browser experimental options
@@ -75,7 +77,7 @@ class WebBot:
         options.add_experimental_option('useAutomationExtension', False)
 
         self.driver = uc.Chrome(options=options)
-        # self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
     def printing_stats_udemy_courses(self):
 

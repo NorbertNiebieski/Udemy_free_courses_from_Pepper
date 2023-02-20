@@ -57,6 +57,8 @@ def main():
         log.root.warning("I was unable to log your pepper account - %s", error, exc_info=1)
         print("I was unable to log your pepper account")
 
+    promotion_links = []
+
     # finding promotions with udemy courses
     try:
         promotion_links = my_bot.find_udemy_promotions_on_pepper()
@@ -87,11 +89,11 @@ def main():
 
     # logging to udemy account
     try:
-        if my_bot.log_to_udemy():
+        if not my_bot.log_to_udemy():
             exit(-1)
     except Exception as error:
-        print("There was problem with loging to your udemy account!")
-        log.root.error("There was problem with loging to your udemy account - %s", error, exc_info=1)
+        print("There was problem with logging to your udemy account!")
+        log.root.error("There was problem with logging to your udemy account - %s", error, exc_info=1)
         exit(-1)
 
     # checking every link
