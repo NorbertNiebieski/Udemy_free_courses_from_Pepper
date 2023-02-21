@@ -1,51 +1,187 @@
+import os
+import random
+import subprocess
+import sys
 from math import trunc
 from time import sleep
 
+from selenium.webdriver import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
+import log
 
 
 def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time=5):
     # go to udemy main page
     web_bot.driver.get("https://www.udemy.com/")
-    sleep(sleep_time / 5)
-    # go to udemy login page
-    web_bot.driver.get(
-        "https://www.udemy.com/join/login-popup/?locale=pl_PL&response_type=html&next=https%3A%2F%2Fwww.udemy.com%2F")
-
     sleep(sleep_time)
 
+    # check present of bot blockade and if there is try to bypass it
+    _check_cloudflare_blockade_and_try_bypass(web_bot)
+    _check_is_perimeterx_blockade_and_try_bypass(web_bot)
+
     # check if you already logged to udemy account
-    if _is_logged_to_udemy_account(web_bot):
+    if _is_logged_to_udemy_account(web_bot, sleep_time):
         if printing:
-            print("I have successfully logged into your udemy account")
+            print("You was already logged to your udemy account")
+        log.root.info("You was already logged to your udemy account")
         return True
 
-    sleep(sleep_time / 5)
+    # go to udemy login page
+    web_bot.driver.find_element_by_xpath("//a[@data-purpose='header-login']").click()
+    sleep(sleep_time / 2)
+
+    # check present of bot blockade and if there is try to bypass it
+    _check_is_perimeterx_blockade_and_try_bypass(web_bot)
+    _check_cloudflare_blockade_and_try_bypass(web_bot)
+
+    # try to pass udemy login, it can by remembered by page
     try:
         web_bot.driver.find_element_by_xpath("//input[@name=\"email\"]").send_keys(udemy_login)
-    except:
-        pass
+    except Exception as error:
+        log.root.debug("I can not pass udemy login to page - %s", error, exc_info=1)
 
+    # pass udemy password
     web_bot.driver.find_element_by_xpath("//input[@name=\"password\"]") \
         .send_keys(udemy_password + Keys.ENTER)
 
-    sleep(sleep_time / 5)
-    if _is_logged_to_udemy_account(web_bot):
+    # check if logging was successful
+    sleep(sleep_time / 2)
+    if _is_logged_to_udemy_account(web_bot, sleep_time):
         if printing:
             print("I have successfully logged into your udemy account")
+        log.root.info("I have successfully logged into your udemy account")
         return True
     else:
         if printing:
-            print("Error! I was unable to login to your udemy account")
+            print("I was unable to login to your udemy account")
+        log.root.info("I was unable to login to your udemy account")
         return False
 
 
-def _is_logged_to_udemy_account(web_bot):
-    if web_bot.driver.current_url == "https://www.udemy.com/":
+def _check_is_perimeterx_blockade_and_try_bypass(web_bot, solve_captcha=True, how_many_trials=10):
+    if _is_perimeterx_blockade(web_bot):
+        print("Detected PerimeterX blockade")
+        log.root.info("Detected PerimeterX blockade")
+        sleep(web_bot.sleep_time / 2)
+
+        # try to solve captcha how_many_trails times
+        while solve_captcha and how_many_trials >= 0:
+            print("I am trying to solve captcha")
+            log.root.info("I am trying to solve captcha")
+
+            if _try_solve_perimeterx_captcha(web_bot):
+                print("Successfully bypass PerimeterX blockade")
+                log.root.info("Successfully bypass PerimeterX blockade")
+                return False
+
+            print("I was not able to solve PerimeterX captcha")
+            log.root.info("I was not able to solve PerimeterX captcha")
+            how_many_trials -= 1
+
+        print("I was not able to bypass PerimeterX blockade")
+        log.root.info("I was not able to bypass PerimeterX blockade")
         return True
+    else:
+        return False
+
+
+def _try_solve_perimeterx_captcha(web_bot):
+    # Click and hold captcha
+    _try_solve_perimeterx_captcha_mouse_movement(web_bot)
+
+    sleep(2 * web_bot.sleep_time)
+
+    # check if successfully bypassed blockade
+    if not _is_perimeterx_blockade(web_bot):
+        return True
+
+    # refresh page
+    web_bot.driver.refresh()
+
+    # check if successfully bypassed blockade
+    if not _is_perimeterx_blockade(web_bot):
+        return True
+
+    return False
+
+
+def _is_perimeterx_blockade(web_bot) -> bool:
+    return web_bot.driver.find_elements_by_xpath("//*[contains (text(), \"PerimeterX\")]")
+
+
+def _try_solve_perimeterx_captcha_mouse_movement(web_bot):
+    # find captcha bar
+    mouse_tracker = web_bot.driver.find_element(By.ID, "px-captcha")
+
+    # click and hold captcha
+    ActionChains(web_bot.driver) \
+        .move_to_element(mouse_tracker) \
+        .move_by_offset(-450 + random.randint(-25, 25), 0 + random.randint(-25, 25)) \
+        .click_and_hold() \
+        .perform()
+    sleep(6 + random.randint(-2, 2))
+
+    # release mouse button
+    ActionChains(web_bot.driver).release().perform()
+
+
+def _check_cloudflare_blockade_and_try_bypass(web_bot, ask_human_for_help=True, restart_if_blockade=True):
+    if _is_cloudflare_blockade(web_bot):
+        print("Detected Cloudflare blockade")
+        log.root.info("Detected Cloudflare blockade")
+
+        # try manually solve captcha
+        if ask_human_for_help:
+            input("Please confirm that you are human and press any key to continue ")
+            if not _is_cloudflare_blockade(web_bot):
+                print("Successfully bypass Cloudflare blockade")
+                log.root.info("Successfully bypass Cloudflare blockade")
+                return False
+
+        # restart whole program and hope some randomization of data help
+        if restart_if_blockade:
+            print("Randomizing data and restarting")
+            log.root.info("Randomizing data and restarting")
+            web_bot.driver.quit()
+            subprocess.call([sys.executable, os.path.realpath(web_bot.starting_file)] + sys.argv[1:])
+
+        print("I was not able to bypass Cloudflare blockade")
+        log.root.info("I was not able to bypass Cloudflare blockade")
+        return True
+    else:
+        return False
+
+
+def _is_cloudflare_blockade(web_bot) -> bool:
+    return web_bot.driver.find_elements_by_xpath("//*[contains (text(), 'Cloudflare')]")
+
+
+def _is_logged_to_udemy_account(web_bot, sleep_time) -> bool:
+    # check if webdriver is on correct page
+    if "udemy.com" not in web_bot.driver.current_url:
+
+        # save current url
+        current_url = web_bot.driver.current_url
+
+        # get to udemy url
+        web_bot.driver.get("https://www.udemy.com/")
+
+        # check if link to user account(avatar) is on page
+        is_logged = web_bot.driver.find_elements_by_xpath("//div/a[@data-purpose='user-dropdown']")
+
+        # go back to first url
+        web_bot.driver.get(current_url)
+        sleep(sleep_time / 5)
+        return is_logged
+    else:
+        # check if link to user account(avatar) is on page
+        return web_bot.driver.find_elements_by_xpath("//div/a[@data-purpose='user-dropdown']")
 
 
 def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_of_course=0):
+    # setting variable depends on if count curses checked
     if course_number:
         how_many_course_left_text = " (" + str(course_number) + "/" + str(number_of_course) + ")"
     else:
@@ -56,19 +192,18 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
     web_bot.number_of_link_looked += 1
     sleep(sleep_time)
 
+    # getting course name
     try:
         course_name = web_bot.driver.find_element_by_xpath("//h1[@data-purpose=\"lead-title\"]").text
-    except:
+    except Exception as error:
+        log.root.warning("Something was wrong when trying to obtain course name - %s", error, exc_info=1)
         course_name = "Error"
 
+    # getting buy course button
     prize = web_bot.driver.find_element_by_xpath('//button[@data-purpose="buy-this-course-button"]')
-    if prize.text == "Kup teraz" or prize.text == "Buy now":
 
-        web_bot.number_of_not_free_course += 1
-        print("This course \"" + course_name + "\" is not for free!" + how_many_course_left_text)
-        return 0
-
-    elif prize.text == "Zapisz się teraz" or prize.text == "Enroll now":
+    #  free course
+    if prize.text == "Zapisz się teraz" or prize.text == "Enroll now":
 
         # Transition to check out
         prize.click()
@@ -87,27 +222,44 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
                 saving = saving[:-3]
                 saving = float(saving.replace(',', '.'))
                 saving = trunc(saving * 100) / 100
-            except:
+            except Exception as error:
+                log.root.warning("Something was wrong, when trying calculate savings for - " + course_name +
+                                 ", error - %s", error, exc_info=1)
                 pass
 
             # buying
             web_bot.driver.find_elements_by_xpath("//button[@type=\"button\"]")[2].click()
+            sleep(sleep_time)
+
             web_bot.number_of_new_course += 1
             print("YAY! You have new free course \"" + course_name + "\'!" + how_many_course_left_text)
-            sleep(sleep_time/2)
+            log.root.info("YAY! You have new free course \"" + course_name + "\'!" + how_many_course_left_text)
             return saving
 
         elif web_bot.driver.current_url[:43] != "https://www.udemy.com/cart/subscribe/course":
             web_bot.number_of_checkout_problem += 1
-            print("I have a problem with this course \"" + course_name + "\" chechout!" + how_many_course_left_text)
+            print("I have a problem with this course \"" + course_name + "\" checkout!" + how_many_course_left_text)
+            log.root.warning("I have a problem with this course \"" + course_name + "\" checkout!" +
+                             how_many_course_left_text)
             return 0
 
+    # course not free
+    elif prize.text == "Kup teraz" or prize.text == "Buy now":
+        web_bot.number_of_not_free_course += 1
+        print("This course \"" + course_name + "\" is not for free!" + how_many_course_left_text)
+        log.root.info("This course \"" + course_name + "\" is not for free!" + how_many_course_left_text)
+        return 0
+
+    # owned course
     elif prize.text == "Przejdź do kursu" or prize.text == "Go to course":
         web_bot.number_of_had_course += 1
         print("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
+        log.root.info("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
         return 0
 
+    # unknown course
     else:
         web_bot.number_of_unrecognized_course += 1
         print("I don\'t recognize this course \"" + course_name + "\"" + how_many_course_left_text)
+        log.root.warning("I don\'t recognize this course \"" + course_name + "\"" + how_many_course_left_text)
         return 0
