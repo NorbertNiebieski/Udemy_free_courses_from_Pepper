@@ -9,7 +9,7 @@ import log
 
 class WebBot:
     def __init__(self, udemy_login="", udemy_password="", pepper_login="", pepper_password="",
-                 path_to_chrome_profile="", sleep_time=5, printing=True, starting_file="main.py"):
+                 path_to_chrome_profile="", sleep_time=5, starting_file="main.py"):
 
         self.udemy_login = udemy_login
         self.udemy_password = udemy_password
@@ -19,9 +19,6 @@ class WebBot:
 
         # set depends on speed of your internet connection
         self.__sleep_time = sleep_time
-
-        # True if you want detailed info in console
-        self.printing = printing
 
         # Some function can restart program - need known starting program
         self.starting_file = starting_file
@@ -118,16 +115,15 @@ class WebBot:
         if self.is_logged_to_udemy:
             return True
         else:
-            self.is_logged_to_udemy = udemy_handling.log_to_udemy(self, self.udemy_login, self.udemy_password,
-                                                                  self.printing)
+            self.is_logged_to_udemy = udemy_handling.log_to_udemy(self, self.udemy_login, self.udemy_password)
             return self.is_logged_to_udemy
 
     def buy_free_course(self, link, course_number=0, number_of_course=0):
         if self.is_logged_to_udemy:
             return udemy_handling.buy_free_course(self, link, course_number, number_of_course)
         else:
-            print("You are not logged to udemy account, when trying to handle this link - " + link)
-            log.root.warning("You are not logged to udemy account, when trying to handle this link - " + link)
+            log.log_and_print("warning", "You are not logged to udemy account, when trying to handle this link - " +
+                              link)
             return 0
 
     def get_sleep_time(self):

@@ -37,33 +37,28 @@ def main():
 
     # depends on your internet connection
     sleep_time = 2
-    printing = True
 
     # starting bot
     try:
         my_bot = web_bot.WebBot(udemy_login, udemy_password, pepper_login, pepper_password, path_to_chrome_profile,
-                                sleep_time, printing)
-        print("Bot lunch correctly!")
-        log.root.info("Bot lunch correctly!")
+                                sleep_time)
+        log.log_and_print("info", "Bot lunch correctly!")
     except Exception as error:
-        print("Something went wrong with lunch bot")
-        log.root.error("Something went wrong with lunch bot - %s", error, exc_info=1)
+        log.log_and_print("error", "Something went wrong with lunch bot", error)
         return -1
 
     # logging to pepper account
     try:
         my_bot.log_to_pepper_account()
     except Exception as error:
-        log.root.warning("I was unable to log your pepper account - %s", error, exc_info=1)
-        print("I was unable to log your pepper account")
+        log.log_and_print("warning", "I was unable to log your pepper account", error)
 
     # finding promotions with udemy courses
     try:
         promotion_links = my_bot.find_udemy_promotions_on_pepper()
     except Exception as error:
-        print("There was error with finding udemy promotions")
-        log.root.error("There was error with finding udemy promotions - %s", error, exc_info=1)
-        exit(-1)
+        log.log_and_print("error", "There was error with finding udemy promotions", error)
+        return -1
 
     links = []
 
@@ -72,15 +67,13 @@ def main():
         try:
             links += my_bot.taking_links_to_udemy_from_pepper_promotion(promotion_link)
         except Exception as error:
-            print("There was problem with extracting links from this pepper promotion - " + str(promotion_link))
-            log.root.warning("There was problem with extracting links from this pepper promotion - "
-                             + str(promotion_link) + ", problem - %s", error, exc_info=1)
+            log.log_and_print("warning", "There was problem with extracting links from this pepper promotion - " +
+                              str(promotion_link), error)
         try:
             my_bot.give_plus_pepper_promotion()
         except Exception as error:
-            print("There was problem with adding the plus this pepper promotion - " + str(promotion_link))
-            log.root.warning("There was problem with adding the plus this pepper promotion - "
-                             + str(promotion_link) + ", error - %s", error, exc_info=1)
+            log.log_and_print("warning", "There was problem with adding the plus this pepper promotion - " +
+                              str(promotion_link), error)
 
     if not links:
         return 0
@@ -88,11 +81,10 @@ def main():
     # logging to udemy account
     try:
         if not my_bot.log_to_udemy():
-            exit(-1)
+            return -1
     except Exception as error:
-        print("There was problem with logging to your udemy account!")
-        log.root.error("There was problem with logging to your udemy account - %s", error, exc_info=1)
-        exit(-1)
+        log.log_and_print("error", "There was problem with logging to your udemy account", error)
+        return -1
 
     # checking every link
     saving = 0
@@ -103,17 +95,17 @@ def main():
         try:
             saving += my_bot.buy_free_course(link, course_number, number_of_course)
         except Exception as error:
-            print("Something went wrong with this link - " + link)
-            log.root.warning("Something went wrong with this link - " + link + ", error - %s", error, exc_info=1)
+            log.log_and_print("warning", "Something went wrong with this link - " + link, error)
 
     # printing stats and ending
     try:
-        my_bot.printing_stats_udemy_courses()
+        if log.is_printing:
+            my_bot.printing_stats_udemy_courses()
     except Exception as error:
-        print("Something went wrong when printing stats")
-        log.root.warning("Something went wrong when printing stats - %s", error, exc_info=1)
+        log.log_and_print("warning", "Something went wrong when printing stats", error)
 
-    print("You saved: " + str(round(saving, 2)))
+    if log.is_printing:
+        print("You saved: " + str(round(saving, 2)))
     my_bot.driver.quit()
 
 

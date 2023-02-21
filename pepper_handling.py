@@ -12,8 +12,7 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password):
 
     # check if you not log already
     if _is_logged_to_pepper_account(web_bot):
-        print("You was already log to pepper account")
-        log.root.info("You was already log to pepper account")
+        log.log_and_print("info", "You was already log to pepper account")
         return True
 
     # click log in button
@@ -27,12 +26,10 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password):
 
     # check if you are successfully log to pepper account and print correct message
     if _is_logged_to_pepper_account(web_bot):
-        print("I successfully log to your pepper account")
-        log.root.info("I successfully log to your pepper account")
+        log.log_and_print("info", "I successfully log to your pepper account")
         return True
     else:
-        print("I was unable to log to your pepper account")
-        log.root.warning("I was unable to log to your pepper account")
+        log.log_and_print("warning", "I was unable to log to your pepper account")
         return False
 
 
@@ -65,8 +62,7 @@ def give_plus_pepper_promotion(web_bot, pepper_promotion_url):
 
     # check if you already gave plus this pepper promotion
     if _is_plus_already_given(web_bot, pepper_promotion_url):
-        print("You already gave plus this pepper promotion - " + pepper_promotion_url)
-        log.root.info("You already gave plus this pepper promotion - " + pepper_promotion_url)
+        log.log_and_print("info", "You already gave plus this pepper promotion - " + pepper_promotion_url)
         return True
 
     # give plus pepper promotion
@@ -74,12 +70,10 @@ def give_plus_pepper_promotion(web_bot, pepper_promotion_url):
 
     # check if plus was given correctly
     if _is_plus_already_given(web_bot, pepper_promotion_url):
-        print("You successfully gave plus this pepper promotion - " + pepper_promotion_url)
-        log.root.info("You successfully gave plus this pepper promotion - " + pepper_promotion_url)
+        log.log_and_print("info", "You successfully gave plus this pepper promotion - " + pepper_promotion_url)
         return True
     else:
-        print("I was unable to gave plus pepper promotion - " + pepper_promotion_url)
-        log.root.info("I was unable to gave plus pepper promotion - " + pepper_promotion_url)
+        log.log_and_print("warning", "I was unable to gave plus pepper promotion - " + pepper_promotion_url)
         return False
 
 
@@ -102,8 +96,7 @@ def find_udemy_promotions_on_pepper(web_bot):
     counter = 0
     promotions_links = []
 
-    print("I find this active promotions:")
-    log.root.info("I find this active promotions:")
+    log.log_and_print("info", "I find this active promotions:")
 
     for promotion in promotions:
 
@@ -116,16 +109,14 @@ def find_udemy_promotions_on_pepper(web_bot):
             promotions_links.append(links.get_attribute("href"))
             promotion_title = links.text
             counter += 1
-            print(str(counter) + ". " + promotion_title)
-            log.root.info(str(counter) + ". " + promotion_title)
+            log.log_and_print("info", str(counter) + ". " + promotion_title)
         except Exception as error:
-            log.root.warning("I have problem with this " + promotion + " promotion!", None, error)
-            print("I have problem with this " + promotion + " promotion!")
+            log.log_and_print("warning", "I have problem with this " + promotion + " promotion!", error)
 
     return promotions_links
 
 
-def taking_links_to_udemy_from_pepper_promotion(web_bot, pepper_promotion_url, printing=True):
+def taking_links_to_udemy_from_pepper_promotion(web_bot, pepper_promotion_url):
     # go to the pepper promotion page
     if web_bot.driver.current_url != pepper_promotion_url:
         web_bot.driver.get(pepper_promotion_url)
@@ -137,8 +128,5 @@ def taking_links_to_udemy_from_pepper_promotion(web_bot, pepper_promotion_url, p
     udemy_links = [udemy_link.get_attribute("title") for udemy_link in sub_links if
                    udemy_link.get_attribute("title") != '']
 
-    if printing:
-        print("I find " + str(udemy_links.__len__()) + " links")
-
-    log.root.info("I find " + str(udemy_links.__len__()) + " links")
+    log.log_and_print("info", "I find " + str(udemy_links.__len__()) + " links")
     return udemy_links
