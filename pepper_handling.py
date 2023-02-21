@@ -5,28 +5,28 @@ from selenium.webdriver.common.keys import Keys
 import log
 
 
-def log_to_pepper_account(web_bot, pepper_login, pepper_password, sleep_time=5):
+def log_to_pepper_account(web_bot, pepper_login, pepper_password):
     # go to pepper login page
     web_bot.driver.get("https://www.pepper.pl")
-    sleep(sleep_time / 5)
+    sleep(web_bot.get_sleep_time() / 5)
 
     # check if you not log already
-    if _is_logged_to_pepper_account(web_bot, sleep_time):
+    if _is_logged_to_pepper_account(web_bot):
         print("You was already log to pepper account")
         log.root.info("You was already log to pepper account")
         return True
 
     # click log in button
     web_bot.driver.find_element_by_xpath("//*[name()='svg'][@class='icon icon--person']/parent::button").click()
-    sleep(sleep_time / 2)
+    sleep(web_bot.get_sleep_time() / 2)
 
     # fill necessary data and click another log in button
     web_bot.driver.find_element_by_xpath("//input[@name=\"identity\"]").send_keys(pepper_login)
     web_bot.driver.find_element_by_xpath("//input[@name=\"password\"]").send_keys(pepper_password + Keys.ENTER)
-    sleep(sleep_time / 5)
+    sleep(web_bot.get_sleep_time() / 5)
 
     # check if you are successfully log to pepper account and print correct message
-    if _is_logged_to_pepper_account(web_bot, sleep_time):
+    if _is_logged_to_pepper_account(web_bot):
         print("I successfully log to your pepper account")
         log.root.info("I successfully log to your pepper account")
         return True
@@ -36,7 +36,7 @@ def log_to_pepper_account(web_bot, pepper_login, pepper_password, sleep_time=5):
         return False
 
 
-def _is_logged_to_pepper_account(web_bot, sleep_time) -> bool:
+def _is_logged_to_pepper_account(web_bot) -> bool:
     # check if webdriver is on correct page
     if "pepper.pl" not in web_bot.driver.current_url:
 
@@ -51,20 +51,20 @@ def _is_logged_to_pepper_account(web_bot, sleep_time) -> bool:
 
         # go back to first url
         web_bot.driver.get(current_url)
-        sleep(sleep_time / 5)
+        sleep(web_bot.get_sleep_time() / 5)
         return is_logged
     else:
         # check if button to user account(avatar) is on page
         return web_bot.driver.find_elements_by_xpath("//button[contains(@class, 'navDropDown-trigger aGrid')]")
 
 
-def give_plus_pepper_promotion(web_bot, pepper_promotion_url, sleep_time=5):
+def give_plus_pepper_promotion(web_bot, pepper_promotion_url):
     # check if you already are in correct page
     if pepper_promotion_url == "":
         pepper_promotion_url = web_bot.driver.current_url
 
     # check if you already gave plus this pepper promotion
-    if _is_plus_already_given(web_bot, pepper_promotion_url, sleep_time):
+    if _is_plus_already_given(web_bot, pepper_promotion_url):
         print("You already gave plus this pepper promotion - " + pepper_promotion_url)
         log.root.info("You already gave plus this pepper promotion - " + pepper_promotion_url)
         return True
@@ -73,7 +73,7 @@ def give_plus_pepper_promotion(web_bot, pepper_promotion_url, sleep_time=5):
     web_bot.driver.find_element_by_xpath("//div[contains(@class, 'vote-box')]/button[2]").click()
 
     # check if plus was given correctly
-    if _is_plus_already_given(web_bot, pepper_promotion_url, sleep_time):
+    if _is_plus_already_given(web_bot, pepper_promotion_url):
         print("You successfully gave plus this pepper promotion - " + pepper_promotion_url)
         log.root.info("You successfully gave plus this pepper promotion - " + pepper_promotion_url)
         return True
@@ -83,11 +83,11 @@ def give_plus_pepper_promotion(web_bot, pepper_promotion_url, sleep_time=5):
         return False
 
 
-def _is_plus_already_given(web_bot, pepper_promotion_url, sleep_time) -> bool:
+def _is_plus_already_given(web_bot, pepper_promotion_url) -> bool:
     # go to the pepper promotion url
     if pepper_promotion_url != web_bot.driver.current_url:
         web_bot.driver.get(pepper_promotion_url)
-        sleep(sleep_time / 5)
+        sleep(web_bot.get_sleep_time() / 5)
 
     # check if you already gave plus this pepper promotion
     return web_bot.driver.find_elements_by_xpath("//div[contains(@class, 'vote-box')]/button")

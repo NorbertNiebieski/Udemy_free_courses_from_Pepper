@@ -12,17 +12,17 @@ from selenium.webdriver.common.keys import Keys
 import log
 
 
-def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time=5):
+def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True):
     # go to udemy main page
     web_bot.driver.get("https://www.udemy.com/")
-    sleep(sleep_time)
+    sleep(web_bot.get_sleep_time())
 
     # check present of bot blockade and if there is try to bypass it
     _check_cloudflare_blockade_and_try_bypass(web_bot)
     _check_is_perimeterx_blockade_and_try_bypass(web_bot)
 
     # check if you already logged to udemy account
-    if _is_logged_to_udemy_account(web_bot, sleep_time):
+    if _is_logged_to_udemy_account(web_bot):
         if printing:
             print("You was already logged to your udemy account")
         log.root.info("You was already logged to your udemy account")
@@ -30,7 +30,7 @@ def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time
 
     # go to udemy login page
     web_bot.driver.find_element_by_xpath("//a[@data-purpose='header-login']").click()
-    sleep(sleep_time / 2)
+    sleep(web_bot.get_sleep_time() / 2)
 
     # check present of bot blockade and if there is try to bypass it
     _check_is_perimeterx_blockade_and_try_bypass(web_bot)
@@ -47,8 +47,8 @@ def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time
         .send_keys(udemy_password + Keys.ENTER)
 
     # check if logging was successful
-    sleep(sleep_time / 2)
-    if _is_logged_to_udemy_account(web_bot, sleep_time):
+    sleep(web_bot.get_sleep_time() / 2)
+    if _is_logged_to_udemy_account(web_bot):
         if printing:
             print("I have successfully logged into your udemy account")
         log.root.info("I have successfully logged into your udemy account")
@@ -64,7 +64,7 @@ def _check_is_perimeterx_blockade_and_try_bypass(web_bot, solve_captcha=True, ho
     if _is_perimeterx_blockade(web_bot):
         print("Detected PerimeterX blockade")
         log.root.info("Detected PerimeterX blockade")
-        sleep(web_bot.sleep_time / 2)
+        sleep(web_bot.get_sleep_time() / 2)
 
         # try to solve captcha how_many_trails times
         while solve_captcha and how_many_trials >= 0:
@@ -91,7 +91,7 @@ def _try_solve_perimeterx_captcha(web_bot):
     # Click and hold captcha
     _try_solve_perimeterx_captcha_mouse_movement(web_bot)
 
-    sleep(2 * web_bot.sleep_time)
+    sleep(2 * web_bot.get_sleep_time())
 
     # check if successfully bypassed blockade
     if not _is_perimeterx_blockade(web_bot):
@@ -158,7 +158,7 @@ def _is_cloudflare_blockade(web_bot) -> bool:
     return web_bot.driver.find_elements_by_xpath("//*[contains (text(), 'Cloudflare')]")
 
 
-def _is_logged_to_udemy_account(web_bot, sleep_time) -> bool:
+def _is_logged_to_udemy_account(web_bot) -> bool:
     # check if webdriver is on correct page
     if "udemy.com" not in web_bot.driver.current_url:
 
@@ -173,14 +173,14 @@ def _is_logged_to_udemy_account(web_bot, sleep_time) -> bool:
 
         # go back to first url
         web_bot.driver.get(current_url)
-        sleep(sleep_time / 5)
+        sleep(web_bot.get_sleep_time() / 5)
         return is_logged
     else:
         # check if link to user account(avatar) is on page
         return web_bot.driver.find_elements_by_xpath("//div/a[@data-purpose='user-dropdown']")
 
 
-def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_of_course=0):
+def buy_free_course(web_bot, udemy_link, course_number=0, number_of_course=0):
     # setting variable depends on if count curses checked
     if course_number:
         how_many_course_left_text = " (" + str(course_number) + "/" + str(number_of_course) + ")"
@@ -201,7 +201,7 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
     # go to udemy course page
     web_bot.driver.get(udemy_link)
     web_bot.number_of_link_looked += 1
-    sleep(sleep_time)
+    sleep(web_bot.get_sleep_time())
 
     # getting course name
     try:
@@ -218,13 +218,13 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
 
         # Transition to check out
         prize.click()
-        sleep(sleep_time)
+        sleep(web_bot.get_sleep_time())
         saving = 0
 
         # Checking if you are in checkout
         if web_bot.driver.current_url[:50] == "https://www.udemy.com/cart/checkout/express/course":
 
-            sleep(2 * sleep_time)
+            sleep(2 * web_bot.get_sleep_time())
 
             # Collection how much you're saving
             try:
@@ -239,7 +239,7 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
 
             # buying
             web_bot.driver.find_elements_by_xpath("//button[@type=\"button\"]")[2].click()
-            sleep(sleep_time)
+            sleep(web_bot.get_sleep_time())
 
             web_bot.number_of_new_course += 1
             print("YAY! You have new free course \"" + course_name + "\'!" + how_many_course_left_text)

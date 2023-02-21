@@ -18,11 +18,12 @@ class WebBot:
         self.pepper_password = pepper_password
 
         # set depends on speed of your internet connection
-        self.sleep_time = sleep_time + random.randint(-1, 1)
+        self.__sleep_time = sleep_time
 
         # True if you want detailed info in console
         self.printing = printing
 
+        # Some function can restart program - need known starting program
         self.starting_file = starting_file
 
         # cache setting and data
@@ -97,13 +98,12 @@ class WebBot:
         if self.is_logged_to_pepper:
             return True
 
-        self.is_logged_to_pepper = pepper_handling.log_to_pepper_account(self, self.pepper_login, self.pepper_password,
-                                                                         self.sleep_time)
+        self.is_logged_to_pepper = pepper_handling.log_to_pepper_account(self, self.pepper_login, self.pepper_password)
         return self.is_logged_to_pepper
 
     def give_plus_pepper_promotion(self, pepper_promotion_url=""):
         if self.is_logged_to_pepper:
-            return pepper_handling.give_plus_pepper_promotion(self, pepper_promotion_url, self.sleep_time)
+            return pepper_handling.give_plus_pepper_promotion(self, pepper_promotion_url)
         else:
             return False
 
@@ -119,13 +119,19 @@ class WebBot:
             return True
         else:
             self.is_logged_to_udemy = udemy_handling.log_to_udemy(self, self.udemy_login, self.udemy_password,
-                                                                  self.printing, self.sleep_time)
+                                                                  self.printing)
             return self.is_logged_to_udemy
 
     def buy_free_course(self, link, course_number=0, number_of_course=0):
         if self.is_logged_to_udemy:
-            return udemy_handling.buy_free_course(self, link, self.sleep_time, course_number, number_of_course)
+            return udemy_handling.buy_free_course(self, link, course_number, number_of_course)
         else:
             print("You are not logged to udemy account, when trying to handle this link - " + link)
             log.root.warning("You are not logged to udemy account, when trying to handle this link - " + link)
             return 0
+
+    def get_sleep_time(self):
+        return self.__sleep_time + random.uniform(-self.__sleep_time / 3, self.__sleep_time / 2)
+
+    def set_sleep_time(self, sleep_time):
+        self.__sleep_time = sleep_time if sleep_time > 0 else 0
