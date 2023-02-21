@@ -36,7 +36,7 @@ def log_to_udemy(web_bot, udemy_login, udemy_password, printing=True, sleep_time
     _check_is_perimeterx_blockade_and_try_bypass(web_bot)
     _check_cloudflare_blockade_and_try_bypass(web_bot)
 
-    # try to pass udemy login, it can by remembered by page
+    # try to pass udemy login, it is possible it was remembered by page
     try:
         web_bot.driver.find_element_by_xpath("//input[@name=\"email\"]").send_keys(udemy_login)
     except Exception as error:
@@ -289,7 +289,7 @@ def _buying_owned_course(course_name, how_many_course_left_text, web_bot):
 
 
 def _check_if_course_already_owned(web_bot, udemy_link):
-    # collecting udemy link from file to set
+    # collecting udemy link from file to dictionary
     if not web_bot.cache_owned_courses:
         # creating relative path and opening file in reading mode
         file_path = web_bot.folder_path + web_bot.file_name
@@ -303,7 +303,7 @@ def _check_if_course_already_owned(web_bot, udemy_link):
         # taking all line to list
         lines = cached_owned_courses_information.readlines()
         for line in lines:
-            # extracting udemy link and adding it to dictonary - udemy_link -> course_name
+            # extracting udemy link and adding it to dictionary - udemy_link -> course_name
             udemy_link_from_file = line.split(" ")[0]
             course_name = line.split(" ")[1]
             web_bot.cache_owned_courses[udemy_link_from_file] = course_name

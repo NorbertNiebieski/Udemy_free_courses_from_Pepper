@@ -57,8 +57,6 @@ def main():
         log.root.warning("I was unable to log your pepper account - %s", error, exc_info=1)
         print("I was unable to log your pepper account")
 
-    promotion_links = []
-
     # finding promotions with udemy courses
     try:
         promotion_links = my_bot.find_udemy_promotions_on_pepper()

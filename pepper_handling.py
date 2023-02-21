@@ -93,12 +93,9 @@ def _is_plus_already_given(web_bot, pepper_promotion_url, sleep_time) -> bool:
     return web_bot.driver.find_elements_by_xpath("//div[contains(@class, 'vote-box')]/button")
 
 
-def find_udemy_promotions_on_pepper(web_bot, how_old_in_days=30):
+def find_udemy_promotions_on_pepper(web_bot):
     # go to the pepper page with udemy coupons and promotions
     web_bot.driver.get("https://www.pepper.pl/kupony/udemy.com")
-
-    # times_since_post = web_bot.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")
-    # while(web_bot.driver.find_elements_by_xpath("//span[@class=\"hide--toW3\"]")[9 + counter].text):
 
     # div with whole promotion with image, link...
     promotions = web_bot.driver.find_elements_by_xpath("//div[contains(@class, 'threadGrid thread-clickRoot')]")

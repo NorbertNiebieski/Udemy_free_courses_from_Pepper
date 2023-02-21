@@ -4,7 +4,6 @@ import random
 
 import pepper_handling
 import udemy_handling
-import user_agents
 import log
 
 
@@ -51,11 +50,6 @@ class WebBot:
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument("--window-size=1920,1080")
         options.add_argument("--enable-javascript")
-
-        # number_of_user_agents = len(user_agents.user_agents)
-        # options.add_argument("user-agent=" + user_agents.user_agents[random.randint(0, number_of_user_agents - 1)])
-        # options.add_argument("user-agent=" + "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
-        #                                      "like Gecko) Chrome/110.0.0.0 Safari/537.36'")
 
         # Path to your chrome profile
         if path_to_chrome_profile != "":

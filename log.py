@@ -30,4 +30,3 @@ handler.setFormatter(formatter)
 root = logging.getLogger()
 root.setLevel(os.environ.get("LOGLEVEL", "DEBUG"))
 root.addHandler(handler)
-

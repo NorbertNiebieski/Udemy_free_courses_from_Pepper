@@ -7,6 +7,13 @@ import log
 
 
 class MyTestCase(unittest2.TestCase):
+    printing = True
+    sleep_time = 5
+    path_to_chrome_profile = ""
+    pepper_password = ""
+    pepper_login = ""
+    udemy_password = ""
+    udemy_login = ""
     __my_bot = None
 
     @classmethod
