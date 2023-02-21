@@ -26,6 +26,11 @@ class WebBot:
 
         self.starting_file = starting_file
 
+        # cache setting and data
+        self.cache_folder_path = "data\\"
+        self.cache_owned_courses_file_name = "cached_owned_courses_information.txt"
+        self.cache_owned_courses = dict()
+
         # stats
         self.number_of_link_looked = 0
         self.number_of_new_course = 0

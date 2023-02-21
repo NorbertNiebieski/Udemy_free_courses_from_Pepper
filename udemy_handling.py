@@ -187,6 +187,17 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
     else:
         how_many_course_left_text = ""
 
+    # check if the course is already owned form cache
+    try:
+        if _check_if_course_already_owned(web_bot, udemy_link):
+            course_name = web_bot.cache_owned_courses.get(udemy_link)
+            return _buying_owned_course(course_name, how_many_course_left_text, web_bot)
+
+    except Exception as error:
+        print("Something went wrong when trying check if course is already owned from cache")
+        log.root.warning("Something went wrong when trying check if course is already owned from cache - %s",
+                         error, exc_info=1)
+
     # go to udemy course page
     web_bot.driver.get(udemy_link)
     web_bot.number_of_link_looked += 1
@@ -225,7 +236,6 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
             except Exception as error:
                 log.root.warning("Something was wrong, when trying calculate savings for - " + course_name +
                                  ", error - %s", error, exc_info=1)
-                pass
 
             # buying
             web_bot.driver.find_elements_by_xpath("//button[@type=\"button\"]")[2].click()
@@ -252,10 +262,15 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
 
     # owned course
     elif prize.text == "Przejdź do kursu" or prize.text == "Go to course":
-        web_bot.number_of_had_course += 1
-        print("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
-        log.root.info("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
-        return 0
+        # cache owned courses, so you do not need check it later
+        try:
+            _cache_owned_courses(udemy_link, course_name, web_bot.cache_folder_path,
+                                 web_bot.cache_owned_courses_file_name)
+        except Exception as error:
+            log.root.warning("Something went wrong when caching owned course information - %s", error, exc_info=1)
+            print("Something went wrong when caching owned course information")
+
+        return _buying_owned_course(course_name, how_many_course_left_text, web_bot)
 
     # unknown course
     else:
@@ -263,3 +278,51 @@ def buy_free_course(web_bot, udemy_link, sleep_time=5, course_number=0, number_o
         print("I don\'t recognize this course \"" + course_name + "\"" + how_many_course_left_text)
         log.root.warning("I don\'t recognize this course \"" + course_name + "\"" + how_many_course_left_text)
         return 0
+
+
+def _buying_owned_course(course_name, how_many_course_left_text, web_bot):
+    # update stats and write info
+    web_bot.number_of_had_course += 1
+    print("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
+    log.root.info("You already had course \"" + course_name + "\"!" + how_many_course_left_text)
+    return 0
+
+
+def _check_if_course_already_owned(web_bot, udemy_link):
+    # collecting udemy link from file to set
+    if not web_bot.cache_owned_courses:
+        # creating relative path and opening file in reading mode
+        file_path = web_bot.folder_path + web_bot.file_name
+        try:
+            cached_owned_courses_information = open(file_path, 'r')
+        except FileNotFoundError as error:
+            print("File with cached owned courses does not exist")
+            log.root.warning("File with cached owned courses does not exist - %s", error, exc_info=1)
+            return False
+
+        # taking all line to list
+        lines = cached_owned_courses_information.readlines()
+        for line in lines:
+            # extracting udemy link and adding it to dictonary - udemy_link -> course_name
+            udemy_link_from_file = line.split(" ")[0]
+            course_name = line.split(" ")[1]
+            web_bot.cache_owned_courses[udemy_link_from_file] = course_name
+
+        # closing file
+        cached_owned_courses_information.close()
+
+    # checking if udemy link is in owned courses
+    return udemy_link in web_bot.cache_owned_courses
+
+
+def _cache_owned_courses(udemy_link, course_name, folder_path, file_name):
+    # prepare relative file path and create folder with file if it does not exit
+    file_path = folder_path + file_name
+    os.makedirs(folder_path, mode=0o777, exist_ok=True)
+
+    # open file in append mode, create if it does not exit
+    cached_owned_courses_information = open(file_path, 'a')
+
+    # append line with - "udemy_link course_name hashed_udemy_link and close file
+    cached_owned_courses_information.write(udemy_link + " " + course_name + " \n")
+    cached_owned_courses_information.close()
