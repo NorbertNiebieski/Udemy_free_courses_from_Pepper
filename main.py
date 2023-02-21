@@ -4,49 +4,69 @@ import log
 
 
 def main():
+    # getting udemy account login and password
     # in the another python file you can write your login and password to udemy account
     try:
         udemy_login = private_data.udemy_login
         udemy_password = private_data.udemy_password
-        log.root.info("Loading udemy account credential from private_data.py")
     except Exception as error:
-        if not log.is_printing:
-            log.root.error("Lack of udemy account credential - exiting - %s", error, exc_info=1)
+        log.log_and_print("warning", "Error when loading udemy account credential from file private_data.py", error)
+        udemy_login = ""
+        udemy_password = ""
+
+    if udemy_login == "" or udemy_password == "":
+        if log.is_printing:
+            log.root.info("Getting udemy account credential from user input")
+            print("You can write to private_data.py your login an password to udemy account")
+            udemy_login = input("Please, write your udemy account login")
+            udemy_password = input("Please, write your udemy account password")
+        else:
+            log.root.error("Lack of udemy account credential!")
             return -1
+    else:
+        log.log_and_print("info", "Loaded udemy account credential from private_data.py")
 
-        log.root.info("Getting udemy account credential from user input, because %s", error, exc_info=1)
-        print("You can create file private_data.py and write there your login an password to udemy account")
-        udemy_login = input("Please, write your udemy account login")
-        udemy_password = input("Please, write your udemy account password")
-
+    # getting pepper account login and password
     # in the another python file you can write your login and password to pepper account
     try:
         pepper_login = private_data.pepper_login
         pepper_password = private_data.pepper_password
-        log.root.info("Loading pepper account credential from private_data.py")
     except Exception as error:
-        if not log.is_printing:
-            log.root.warning("Lack of pepper account credential - %s", error, exc_info=1)
-        else:
-            log.root.info("Getting pepper account credential from user input, because %s", error, exc_info=1)
-            print("You can create file private_data.py and write there your login an password to pepper account")
+        log.log_and_print("warning", "Error when loading pepper account credential from file private_data.py", error)
+        pepper_login = ""
+        pepper_password = ""
+
+    if pepper_login == "" or pepper_password == "":
+        if log.is_printing:
+            log.root.info("Getting pepper account credential from user input")
+            print("You can write to private_data.py your login an password to pepper account")
             pepper_login = input("Please, write your pepper account login")
             pepper_password = input("Please, write your pepper account password")
+        else:
+            log.root.warning("Lack of pepper account credential!")
+    else:
+        log.log_and_print("info", "Loaded pepper account credential from private_data.py")
 
+    # getting path to your chrome profile
     # in the another python file you can write path to your chrome profile
     try:
         path_to_chrome_profile = private_data.path_to_chrome_profile
-        log.root.info("Loading path to chrome profile from private_data.py")
     except Exception as error:
-        if not log.is_printing:
-            log.root.warning("Lack of path to chrome profile - %s", error, exc_info=1)
+        log.log_and_print("warning", "Error when loading path to chrome profile from file private_data.py", error)
+        path_to_chrome_profile = ""
+
+    if path_to_chrome_profile == "":
+        if log.is_printing:
+            log.root.info("Getting path to chrome profile from user input")
+            print("You can write to private_data.py your path to chrome profile")
+            path_to_chrome_profile = input("Please, write your path to chrome profile")
         else:
-            log.root.info("Getting path to chrome profile from user input, because %s", error, exc_info=1)
-            print("You can create file private_data.py and write there path to your chrome profile")
-            path_to_chrome_profile = input("Please, write path to your chrome profile or leave blank")
+            log.root.warning("Lack of path to chrome profile")
+    else:
+        log.log_and_print("info", "Loaded path to chrome profile from private_data.py")
 
     # depends on your internet connection
-    sleep_time = 2
+    sleep_time = 3
 
     # starting bot
     try:

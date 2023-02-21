@@ -26,7 +26,7 @@ class MyTestCase(unittest2.TestCase):
         cls.path_to_chrome_profile = private_data.path_to_chrome_profile
 
         # depends on your internet connection
-        cls.sleep_time = 2
+        cls.sleep_time = 3
 
         # variable to storing cookies
         cls.__stored_cookies = {}
